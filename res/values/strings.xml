@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+      
+  <string name="app_name">BatteryAlarm</string>
+  
+  <string name="start_alarm_service">Start</string>
+  <string name="stop_alarm_service">Stop</string>
+  
+  <string name="alarm_service">Battery Alarm</string>
+  
+  <string name="alarm_service_started">Started</string>
+  <string name="alarm_service_finished">Finished</string>
+  
+  <string name="monitoring_battery">Monitoring battery...</string>
+  <string name="not_monitoring_battery">Stopped monitoring battery.</string>
+  
+  <string name="enabled">Enabled</string>
+  
+  <string name="notification_sound">Sound</string>
+  <string name="notification_sound_summary">Sound to play when the battery is low</string>
+  
+  <string name="delay_minutes">Delay</string>
+  <string name="delay_summary">Check the battery every</string>
+  <string name="delay_dialog_title">How often?</string>
+  <string name="delay_hint">delay (minutes)</string>
+  <string name="minutes"> minutes</string>
+  
+  <string name="threshold">Threshold</string>
+  <string name="threshold_summary">Notify me when the battery is below</string>
+  <string name="threshold_dialog_title">How low can it go?</string>
+  <string name="threshold_hint">threshold (percentage)</string>
+  
+  <string name="custom_sound">Custom Sound</string>
+  
+  <string name="launch_on_startup">Enable On Startup</string>
+  <string name="will_launch_on_startup">Start when phone is turned on</string>
+  <string name="will_not_launch_on_startup">Must be manually enabled</string>
+
+</resources>

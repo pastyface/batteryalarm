@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+  
+    <CheckBoxPreference
+        android:key="prefEnabled"
+        android:title="@string/enabled"/>
+  
+    <EditTextPreference
+        android:key="prefDelayMinutes"
+        android:title="@string/delay_minutes"
+        android:dialogTitle="@string/delay_dialog_title"
+        android:numeric="integer"     
+        android:maxLength="3"     
+        android:hint="@string/delay_hint" />
+        
+    <EditTextPreference
+        android:key="prefThreshold"
+        android:title="@string/threshold"
+        android:dialogTitle="@string/threshold_dialog_title"
+        android:numeric="integer"     
+        android:maxLength="2"     
+        android:hint="@string/threshold_hint" />
+    
+    <RingtonePreference
+        android:key="prefNotificationSound"
+        android:title="@string/notification_sound"
+        android:showDefault="true"
+        android:showSilent="false" />
+    
+	<CheckBoxPreference
+		android:key="prefLaunchOnStartup"
+		android:title="@string/launch_on_startup"/>
+    
+    
+</PreferenceScreen>
