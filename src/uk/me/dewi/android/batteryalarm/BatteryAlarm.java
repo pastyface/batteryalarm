@@ -23,7 +23,6 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     public static final int DEFAULT_THRESHOLD = 15;
     public static final boolean DEFAULT_LAUNCH_ON_STARTUP = true;
     public static final int DEFAULT_NOTIFICATION_SOUND_TYPE = SOUND_TYPE_DEFAULT;
-    public static final String DEFAULT_SOUND = "content://media/internal/audio/media/45";
     
     public static SharedPreferences mSettings;
     public static BatteryAlarmLauncher mLauncher;
@@ -56,6 +55,12 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     protected void onDestroy() {
         mSettings.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
+    }
+    
+    @Override
+    protected void onStop(){
+        super.onStop();
+        System.exit(0);
     }
     
     @Override
@@ -156,9 +161,6 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         }
         if(!mSettings.contains(PREF_THRESHOLD)){
             editor.putString(PREF_THRESHOLD, Integer.valueOf(DEFAULT_THRESHOLD).toString());
-        }
-        if(!mSettings.contains(PREF_NOTIFICATION_SOUND)){
-            editor.putString(PREF_NOTIFICATION_SOUND, DEFAULT_SOUND);
         }
         if(!mSettings.contains(PREF_LAUNCH_ON_STARTUP)){
             editor.putBoolean(PREF_LAUNCH_ON_STARTUP, false);

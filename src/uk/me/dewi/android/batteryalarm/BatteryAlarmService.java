@@ -34,6 +34,7 @@ public class BatteryAlarmService extends Service {
 
     @Override
     public void onCreate() {
+        super.onCreate();
         mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -43,7 +44,10 @@ public class BatteryAlarmService extends Service {
                                       .toString()));
         
         if(settings.contains(BatteryAlarm.PREF_NOTIFICATION_SOUND)){
-            mSoundUri = Uri.parse(settings.getString(BatteryAlarm.PREF_NOTIFICATION_SOUND, ""));
+            String sound = settings.getString(BatteryAlarm.PREF_NOTIFICATION_SOUND, "");
+            if(sound.length() > 0){
+                mSoundUri = Uri.parse(sound);
+            }
         }
         
         // Start up the thread running the service.
@@ -54,7 +58,7 @@ public class BatteryAlarmService extends Service {
     @Override
     public void onDestroy() {
         
-
+        super.onDestroy();
     }
 
     /**
