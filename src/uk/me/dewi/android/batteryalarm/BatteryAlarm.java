@@ -58,7 +58,11 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         updateLauchOnStartup(getPreferenceScreen().findPreference(PREF_LAUNCH_ON_STARTUP));
         updateThreshold(getPreferenceScreen().findPreference(PREF_THRESHOLD));
         updateNotificationSound(getPreferenceScreen().findPreference(PREF_NOTIFICATION_SOUND));
-        updateDisableAtNight();
+        
+        Preference disableAtNightPref = getPreferenceScreen().findPreference(PREF_DISABLE_AT_NIGHT);
+        Preference minTimePref = getPreferenceScreen().findPreference(PREF_MIN_TIME);
+        Preference maxTimePref = getPreferenceScreen().findPreference(PREF_MAX_TIME);
+        updateDisableAtNight(disableAtNightPref, minTimePref, maxTimePref);
     }
 
     @Override
@@ -76,6 +80,10 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Preference preference = getPreferenceScreen().findPreference(key);
+        
+        Preference disableAtNightPref = getPreferenceScreen().findPreference(PREF_DISABLE_AT_NIGHT);
+        Preference minTimePref = getPreferenceScreen().findPreference(PREF_MIN_TIME);
+        Preference maxTimePref = getPreferenceScreen().findPreference(PREF_MAX_TIME);
         
         if(PREF_ENABLED.equals(preference.getKey())){
             if(mSettings.getBoolean(preference.getKey(), false)){
@@ -102,15 +110,15 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
             restart();
         }
         else if(PREF_DISABLE_AT_NIGHT.equals(preference.getKey())){
-            updateDisableAtNight();
+            updateDisableAtNight(preference, minTimePref, maxTimePref);
             restart();
         }
         else if(PREF_MIN_TIME.equals(preference.getKey())){
-            updateDisableAtNight();
+            updateDisableAtNight(disableAtNightPref, preference, maxTimePref);
             restart();
         }
         else if(PREF_MAX_TIME.equals(preference.getKey())){
-            updateDisableAtNight();
+            updateDisableAtNight(disableAtNightPref, minTimePref, preference);
             restart();
         }
     }
@@ -167,11 +175,8 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         
     }
     
-    private void updateDisableAtNight() {
-        Preference disableAtNightPref = getPreferenceScreen().findPreference(PREF_DISABLE_AT_NIGHT);
-        Preference minTimePref = getPreferenceScreen().findPreference(PREF_MIN_TIME);
-        Preference maxTimePref = getPreferenceScreen().findPreference(PREF_MAX_TIME);
-        
+    private void updateDisableAtNight(Preference disableAtNightPref, Preference minTimePref, Preference maxTimePref) {
+
         String minTime = convert24hrTo12(mSettings.getString(PREF_MIN_TIME, DEFAULT_MIN_TIME));
         String maxTime = convert24hrTo12(mSettings.getString(PREF_MAX_TIME, DEFAULT_MAX_TIME));
         
@@ -236,7 +241,7 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     
     public static String convert24hrTo12(String time){
         int hours = parseHours(time);
-        int minutes = parseHours(time);
+        int minutes = parseMinutes(time);
         boolean isPM = hours > 12;
         if(isPM) hours -= 12;
         return "" + hours + ":" + EditTimePreference.MINUTE_FMT.format(minutes) + (isPM ? "pm" : "am");
