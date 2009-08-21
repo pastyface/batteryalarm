@@ -1,5 +1,6 @@
 package uk.me.dewi.android.batteryalarm;
 
+import uk.me.dewi.android.preference.EditTimePreference;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -9,12 +10,16 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferenceChangeListener{
-    
+
     public static final String PREF_ENABLED = "prefEnabled";
     public static final String PREF_NOTIFICATION_SOUND = "prefNotificationSound";
     public static final String PREF_THRESHOLD = "prefThreshold";
     public static final String PREF_LAUNCH_ON_STARTUP = "prefLaunchOnStartup";
     public static final String PREF_DELAY_MINUTES = "prefDelayMinutes";
+    public static final String PREF_DISABLE_AT_NIGHT = "prefDisableAtNight";
+    public static final String PREF_MIN_TIME = "prefMinTime";
+    public static final String PREF_MAX_TIME = "prefMaxTime";
+    
     public static final int SOUND_TYPE_DEFAULT = 0;
     public static final int SOUND_TYPE_SYSTEM = 1;
     public static final int SOUND_TYPE_CUSTOM = 2;
@@ -23,6 +28,10 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     public static final int DEFAULT_THRESHOLD = 15;
     public static final boolean DEFAULT_LAUNCH_ON_STARTUP = true;
     public static final int DEFAULT_NOTIFICATION_SOUND_TYPE = SOUND_TYPE_DEFAULT;
+    
+    public static final boolean DEFAULT_DISABLE_AT_NIGHT = false;
+    public static final String DEFAULT_MIN_TIME = "9:00";
+    public static final String DEFAULT_MAX_TIME = "23:00";
     
     public static SharedPreferences mSettings;
     public static BatteryAlarmLauncher mLauncher;
@@ -45,12 +54,13 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
             }
         }
         
-        updateDelayPrefSummary(getPreferenceScreen().findPreference(PREF_DELAY_MINUTES));
-        updateLauchOnStartupPrefSummary(getPreferenceScreen().findPreference(PREF_LAUNCH_ON_STARTUP));
-        updateThresholdPrefSummary(getPreferenceScreen().findPreference(PREF_THRESHOLD));
-        updateNotificationSoundPrefSummary(getPreferenceScreen().findPreference(PREF_NOTIFICATION_SOUND));
+        updateDelay(getPreferenceScreen().findPreference(PREF_DELAY_MINUTES));
+        updateLauchOnStartup(getPreferenceScreen().findPreference(PREF_LAUNCH_ON_STARTUP));
+        updateThreshold(getPreferenceScreen().findPreference(PREF_THRESHOLD));
+        updateNotificationSound(getPreferenceScreen().findPreference(PREF_NOTIFICATION_SOUND));
+        updateDisableAtNight();
     }
-    
+
     @Override
     protected void onDestroy() {
         mSettings.unregisterOnSharedPreferenceChangeListener(this);
@@ -68,7 +78,7 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         Preference preference = getPreferenceScreen().findPreference(key);
         
         if(PREF_ENABLED.equals(preference.getKey())){
-            if(preference.getSharedPreferences().getBoolean(preference.getKey(), false)){
+            if(mSettings.getBoolean(preference.getKey(), false)){
                 start();
             }
             else {
@@ -77,18 +87,30 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
             
         }
         else if(PREF_DELAY_MINUTES.equals(preference.getKey())){
-            updateDelayPrefSummary(preference);
+            updateDelay(preference);
             restart();
         }
         else if(PREF_LAUNCH_ON_STARTUP.equals(preference.getKey())){
-            updateLauchOnStartupPrefSummary(preference);
+            updateLauchOnStartup(preference);
         }
         else if(PREF_THRESHOLD.equals(preference.getKey())){
-            updateThresholdPrefSummary(preference);
+            updateThreshold(preference);
             restart();
         }
         else if(PREF_NOTIFICATION_SOUND.equals(preference.getKey())){
-            updateNotificationSoundPrefSummary(preference);
+            updateNotificationSound(preference);
+            restart();
+        }
+        else if(PREF_DISABLE_AT_NIGHT.equals(preference.getKey())){
+            updateDisableAtNight();
+            restart();
+        }
+        else if(PREF_MIN_TIME.equals(preference.getKey())){
+            updateDisableAtNight();
+            restart();
+        }
+        else if(PREF_MAX_TIME.equals(preference.getKey())){
+            updateDisableAtNight();
             restart();
         }
     }
@@ -108,7 +130,7 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         }
     }
 
-    public void updateThresholdPrefSummary(Preference preference) {
+    public void updateThreshold(Preference preference) {
         preference.setSummary(getString(R.string.threshold_summary)
                                     + ' '
                                     + getThreshold()
@@ -116,7 +138,7 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     }
 
 
-    public void updateDelayPrefSummary(Preference preference) {
+    public void updateDelay(Preference preference) {
         preference.setSummary(getString(R.string.delay_summary)
                                     + ' '
                                     + getDelayMinutes()
@@ -125,8 +147,8 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     }
 
 
-    public void updateLauchOnStartupPrefSummary(Preference preference) {
-        if(preference.getSharedPreferences().getBoolean(preference.getKey(), true)){
+    public void updateLauchOnStartup(Preference preference) {
+        if(mSettings.getBoolean(preference.getKey(), true)){
             preference.setSummary(getString(R.string.will_launch_on_startup));
         }
         else {
@@ -134,11 +156,38 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         }
     }
     
-    public void updateNotificationSoundPrefSummary(Preference preference) {
+    public void updateNotificationSound(Preference preference) {
         String url = mSettings.getString(PREF_NOTIFICATION_SOUND, "");
         if(url.length() > 0){
             preference.setSummary("Ringtone "+url.substring(url.lastIndexOf('/')+1));
-            //TODO support custom media
+        }
+        else{
+            preference.setSummary("");
+        }
+        
+    }
+    
+    private void updateDisableAtNight() {
+        Preference disableAtNightPref = getPreferenceScreen().findPreference(PREF_DISABLE_AT_NIGHT);
+        Preference minTimePref = getPreferenceScreen().findPreference(PREF_MIN_TIME);
+        Preference maxTimePref = getPreferenceScreen().findPreference(PREF_MAX_TIME);
+        
+        String minTime = convert24hrTo12(mSettings.getString(PREF_MIN_TIME, DEFAULT_MIN_TIME));
+        String maxTime = convert24hrTo12(mSettings.getString(PREF_MAX_TIME, DEFAULT_MAX_TIME));
+        
+        if(mSettings.getBoolean(PREF_DISABLE_AT_NIGHT, DEFAULT_DISABLE_AT_NIGHT)){
+            minTimePref.setEnabled(true);
+            maxTimePref.setEnabled(true);
+            minTimePref.setSummary(minTime);
+            maxTimePref.setSummary(maxTime);
+            disableAtNightPref.setSummary("Alert between " + minTime+ " and " +maxTime);
+        }
+        else{
+            minTimePref.setEnabled(false);
+            maxTimePref.setEnabled(false);
+            maxTimePref.setSummary("");
+            minTimePref.setSummary("");
+            disableAtNightPref.setSummary("Alert at any time");
         }
         
     }
@@ -165,7 +214,32 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
         if(!mSettings.contains(PREF_LAUNCH_ON_STARTUP)){
             editor.putBoolean(PREF_LAUNCH_ON_STARTUP, false);
         }
+        if(!mSettings.contains(PREF_DISABLE_AT_NIGHT)){
+            editor.putBoolean(PREF_DISABLE_AT_NIGHT, false);
+        }
+        if(!mSettings.contains(PREF_MIN_TIME)){
+            editor.putString(PREF_MIN_TIME, DEFAULT_MIN_TIME);
+        }
+        if(!mSettings.contains(PREF_MAX_TIME)){
+            editor.putString(PREF_MAX_TIME, DEFAULT_MAX_TIME);
+        }
         editor.commit();
     }
 
+    public static int parseHours(String time){
+        return Integer.parseInt(time.split(":")[0]);
+    }
+    
+    public static int parseMinutes(String time){
+        return Integer.parseInt(time.split(":")[1]);
+    }
+    
+    public static String convert24hrTo12(String time){
+        int hours = parseHours(time);
+        int minutes = parseHours(time);
+        boolean isPM = hours > 12;
+        if(isPM) hours -= 12;
+        return "" + hours + ":" + EditTimePreference.MINUTE_FMT.format(minutes) + (isPM ? "pm" : "am");
+    }
+    
 }

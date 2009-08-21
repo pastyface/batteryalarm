@@ -26,7 +26,21 @@
         android:key="prefNotificationSound"
         android:title="@string/notification_sound"
         android:showDefault="true"
-        android:showSilent="false" />
+        android:showSilent="true" />
+        
+    <CheckBoxPreference
+        android:key="prefDisableAtNight"
+        android:title="@string/disable_at_night"/>
+    
+    <uk.me.dewi.android.preference.EditTimePreference
+        android:key="prefMinTime"
+        android:title="@string/min_time"
+    />
+    
+    <uk.me.dewi.android.preference.EditTimePreference
+        android:key="prefMaxTime"
+        android:title="@string/max_time"
+    />
     
 	<CheckBoxPreference
 		android:key="prefLaunchOnStartup"

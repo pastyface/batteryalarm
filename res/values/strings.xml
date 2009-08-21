@@ -36,4 +36,7 @@
   <string name="will_launch_on_startup">Start when phone is turned on</string>
   <string name="will_not_launch_on_startup">Must be manually enabled</string>
 
+  <string name="disable_at_night">Disable At Night</string>
+  <string name="min_time">Enable At</string>
+  <string name="max_time">Disable At</string>
 </resources>
