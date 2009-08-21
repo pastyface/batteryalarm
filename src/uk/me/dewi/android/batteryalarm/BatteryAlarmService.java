@@ -33,7 +33,7 @@ public class BatteryAlarmService extends Service {
      
     NotificationManager mNM;
 
-    int mThreshold = 15;
+    int mThreshold = BatteryAlarm.DEFAULT_THRESHOLD;
     Uri mSoundUri;
      
     boolean mReceivedBatteryStatus = false;
@@ -49,9 +49,14 @@ public class BatteryAlarmService extends Service {
             return;
         }
         
-        mThreshold = Integer.parseInt(settings.getString(BatteryAlarm.PREF_THRESHOLD, 
-                                      Integer.valueOf(BatteryAlarm.DEFAULT_THRESHOLD)
-                                      .toString()));
+        try{
+            mThreshold = Integer.parseInt(settings.getString(BatteryAlarm.PREF_THRESHOLD, 
+                                          Integer.valueOf(BatteryAlarm.DEFAULT_THRESHOLD)
+                                          .toString()));
+        }
+        catch(Exception e){
+            Log.e(getClass().getName(), "Could not parse threshold", e);
+        }
         
         if(settings.contains(BatteryAlarm.PREF_NOTIFICATION_SOUND)){
             String sound = settings.getString(BatteryAlarm.PREF_NOTIFICATION_SOUND, "");

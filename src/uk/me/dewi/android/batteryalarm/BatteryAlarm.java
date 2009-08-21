@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferenceChangeListener{
 
@@ -198,11 +199,23 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     }
     
     public int getDelayMinutes(){
-        return Integer.parseInt(mSettings.getString(PREF_DELAY_MINUTES, Integer.valueOf(DEFAULT_DELAY_MINUTES).toString()));
+        try {
+            return Integer.parseInt(mSettings.getString(PREF_DELAY_MINUTES, Integer.valueOf(DEFAULT_DELAY_MINUTES).toString()));
+        }
+        catch(NumberFormatException e){
+            Log.e(BatteryAlarm.class.getName(), "Could not parse delay, using default: "+DEFAULT_DELAY_MINUTES, e);
+            return DEFAULT_DELAY_MINUTES;
+        }
     }
     
     public int getThreshold(){
-        return Integer.parseInt(mSettings.getString(PREF_THRESHOLD, Integer.valueOf(DEFAULT_THRESHOLD).toString()));
+        try {
+            return Integer.parseInt(mSettings.getString(PREF_THRESHOLD, Integer.valueOf(DEFAULT_THRESHOLD).toString()));
+        }
+        catch(NumberFormatException e){
+            Log.e(BatteryAlarm.class.getName(), "Could not parse threshold, using default: "+DEFAULT_THRESHOLD, e);
+            return DEFAULT_THRESHOLD;
+        }
     }
     
     public void setDefaultsIfEmpty(){
@@ -232,11 +245,23 @@ public class BatteryAlarm extends PreferenceActivity implements OnSharedPreferen
     }
 
     public static int parseHours(String time){
-        return Integer.parseInt(time.split(":")[0]);
+        try{
+            return Integer.parseInt(time.split(":")[0]);
+        }
+        catch(Exception e){
+            Log.e(BatteryAlarm.class.getName(), "Could not parse hours", e);
+            return 0;
+        } 
     }
     
     public static int parseMinutes(String time){
-        return Integer.parseInt(time.split(":")[1]);
+        try{
+            return Integer.parseInt(time.split(":")[1]);
+        }
+        catch(Exception e){
+            Log.e(BatteryAlarm.class.getName(), "Could not parse minutes", e);
+            return 0;
+        }
     }
     
     public static String convert24hrTo12(String time){

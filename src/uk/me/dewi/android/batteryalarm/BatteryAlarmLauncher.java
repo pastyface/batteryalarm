@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.Toast;
 
 public class BatteryAlarmLauncher {
@@ -20,8 +21,14 @@ public class BatteryAlarmLauncher {
         
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         
-        int delayMinutes = Integer.valueOf(settings.getString(BatteryAlarm.PREF_DELAY_MINUTES,
+        int delayMinutes = BatteryAlarm.DEFAULT_DELAY_MINUTES;
+        try {
+            Integer.valueOf(settings.getString(BatteryAlarm.PREF_DELAY_MINUTES,
                 Integer.valueOf(DEFAULT_DELAY_MINUTES).toString()));
+        }
+        catch(NumberFormatException e){
+            Log.e(getClass().getName(), "Could not parse delay", e);
+        }
  
         mAlarmSender = PendingIntent.getService(context,
                 0, new Intent(context, BatteryAlarmService.class), 0); 
